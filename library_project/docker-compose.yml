@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: library_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=library_db
+      - POSTGRES_USER=library_user
+      - POSTGRES_PASSWORD=library_pass123
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U library_user -d library_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - library_network
+
+  web:
+    build: .
+    container_name: library_web
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - DATABASE_NAME=library_db
+      - DATABASE_USER=library_user
+      - DATABASE_PASSWORD=library_pass123
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - SECRET_KEY=+2s%$$(3)0h$$)=97j2zu+x0miwon^5iz2c4e*3#dqd4-vng+2t-
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - library_network
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  library_network:
+    driver: bridge
+
