@@ -1,38 +1,60 @@
-import { ApolloClient, InMemoryCache, createHttpLink, from } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
-import { onError } from '@apollo/client/link/error';
+import { ApolloClient, InMemoryCache, ApolloLink } from '@apollo/client';
+import { HttpLink } from '@apollo/client/link/http';
+import { SetContextLink } from '@apollo/client/link/context';
+import { ErrorLink } from '@apollo/client/link/error';
+import { CombinedGraphQLErrors } from '@apollo/client/errors';
 
-const httpLink = createHttpLink({
-  uri: 'http://localhost:8000/graphql/',
+const httpLink = new HttpLink({
+  uri: process.env.REACT_APP_API_URL || 'http://localhost:8000/graphql/',
 });
 
-const authLink = setContext((_, { headers }) => {
+const authLink = new SetContextLink((prevContext, operation) => {
   const token = localStorage.getItem('token');
   return {
     headers: {
-      ...headers,
+      ...prevContext.headers,
       authorization: token ? `JWT ${token}` : '',
     },
   };
 });
 
-const errorLink = onError(({ graphQLErrors, networkError }: any) => {
-  if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path }: any) =>
-      console.log(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      )
-    );
+const errorLink = new ErrorLink(({ error, operation, forward }) => {
+  // Check if it's a GraphQL error with an errors array
+  if (CombinedGraphQLErrors.is(error)) {
+    error.errors.forEach(({ message, locations, path }) => {
+      if (process.env.REACT_APP_ENV === 'development') {
+        console.error(
+          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+        );
+      }
+      // Handle authentication errors
+      if (message.includes('not authenticated') || message.includes('permission')) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+    });
+  } else {
+    // Network or other error
+    if (process.env.REACT_APP_ENV === 'development') {
+      console.error(`[Network error]: ${error}`);
+    }
   }
-  if (networkError) console.log(`[Network error]: ${networkError}`);
 });
 
 const client = new ApolloClient({
-  link: from([errorLink, authLink, httpLink]),
+  link: ApolloLink.from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache(),
   defaultOptions: {
     watchQuery: {
-      fetchPolicy: 'network-only',
+      fetchPolicy: 'cache-and-network',
+      errorPolicy: 'all',
+    },
+    query: {
+      fetchPolicy: 'cache-first',
+      errorPolicy: 'all',
+    },
+    mutate: {
+      errorPolicy: 'all',
     },
   },
 });

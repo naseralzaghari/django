@@ -18,17 +18,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole) {
-    console.log('ProtectedRoute - User data:', user);
-    console.log('ProtectedRoute - Required role:', requiredRole);
-    console.log('ProtectedRoute - User userType:', user.userType);
-    console.log('ProtectedRoute - Match:', user.userType?.toLowerCase() === requiredRole.toLowerCase());
-    
-    if (user.userType?.toLowerCase() !== requiredRole.toLowerCase()) {
-      console.log('ProtectedRoute - Access DENIED, redirecting to home');
-      return <Navigate to="/" replace />;
-    }
-    console.log('ProtectedRoute - Access GRANTED');
+  if (requiredRole && user.userType?.toLowerCase() !== requiredRole.toLowerCase()) {
+    return <Navigate to="/" replace />;
   }
 
   return children;

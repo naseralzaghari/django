@@ -4,7 +4,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { LOGIN_MUTATION } from '../apollo/queries';
 import { useAuth } from '../auth/AuthContext';
 import './Auth.css';
-import './Auth.css';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');

@@ -20,6 +20,27 @@ body {
   margin: 0 auto;
 }
 
+/* Toast notifications styling */
+.toast-notification {
+  background: #363636 !important;
+  color: #fff !important;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toast-success {
+  border-left: 4px solid #4ade80;
+}
+
+.toast-error {
+  border-left: 4px solid #ef4444;
+}
+
+.toast-loading {
+  border-left: 4px solid #3b82f6;
+}
+
 .loading {
   display: flex;
   justify-content: center;

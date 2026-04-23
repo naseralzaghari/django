@@ -1,9 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ApolloProvider } from '@apollo/client/react';
+import { Toaster } from 'react-hot-toast';
 import client from './apollo/client';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import ProtectedRoute from './auth/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -95,11 +97,37 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <ApolloProvider client={client}>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ApolloProvider>
+    <ErrorBoundary>
+      <ApolloProvider client={client}>
+        <AuthProvider>
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              className: 'toast-notification',
+              success: {
+                className: 'toast-success',
+                iconTheme: {
+                  primary: '#4ade80',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                className: 'toast-error',
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+              },
+              loading: {
+                className: 'toast-loading',
+              },
+            }}
+          />
+          <AppContent />
+        </AuthProvider>
+      </ApolloProvider>
+    </ErrorBoundary>
   );
 }
 

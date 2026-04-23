@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
+import toast from 'react-hot-toast';
 import { GET_MY_LOANS, RETURN_BOOK } from '../apollo/queries';
-import './MyLoans.css';
 import { BookLoan } from '../types';
 import './MyLoans.css';
 
@@ -9,11 +9,11 @@ const MyLoans: React.FC = () => {
   const { data, loading, error, refetch } = useQuery<{ myLoans: BookLoan[] }>(GET_MY_LOANS);
   const [returnBook] = useMutation(RETURN_BOOK, {
     onCompleted: () => {
-      alert('Book returned successfully!');
+      toast.success('Book returned successfully!');
       refetch();
     },
     onError: (err: any) => {
-      alert(`Error: ${err.message}`);
+      toast.error(`Error: ${err.message}`);
     },
   });
 

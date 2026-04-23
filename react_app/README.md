@@ -22,16 +22,19 @@ A React TypeScript application with Apollo Client for managing a library system 
 ## Tech Stack
 
 - **React 18** with TypeScript
-- **Apollo Client** for GraphQL
-- **React Router** for navigation
+- **Apollo Client 4** for GraphQL with optimized caching
+- **React Router v6** for navigation
+- **React Hot Toast** for elegant notifications
 - **JWT Authentication** with localStorage persistence
 - **Role-Based Access Control** (Admin/Regular user)
+- **Error Boundaries** for graceful error handling
+- **Environment Variables** for configuration management
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v16 or higher)
 - npm or yarn
-- Django backend running at \`http://localhost:8000\`
+- Django backend running (default: \`http://localhost:8000\`)
 
 ## Installation
 
@@ -45,9 +48,13 @@ cd react_app
 npm install
 \`\`\`
 
-3. (Optional) Create a \`.env\` file for custom configuration:
-\`\`\`env
-REACT_APP_GRAPHQL_URL=http://localhost:8000/graphql/
+3. Configure environment variables:
+\`\`\`bash
+# Copy the example file
+cp .env.example .env
+
+# Edit .env and update values if needed
+# REACT_APP_API_URL=http://localhost:8000/graphql/
 \`\`\`
 
 ## Running the Application
@@ -163,6 +170,59 @@ npm run build
 
 The optimized production build will be in the \`build/\` directory.
 
+## Development Scripts
+
+\`\`\`bash
+# Start development server
+npm start
+
+# Run tests
+npm test
+
+# Build for production
+npm build
+
+# Lint code
+npm run lint
+
+# Lint and auto-fix issues
+npm run lint:fix
+
+# Format code with Prettier
+npm run format
+
+# Check code formatting
+npm run format:check
+\`\`\`
+
+## Code Quality & Best Practices
+
+This project follows modern React best practices:
+
+### ✅ Implemented Features
+- **TypeScript** - Full type safety across the application
+- **ESLint** - Code linting with React-specific rules
+- **Prettier** - Consistent code formatting
+- **Environment Variables** - Secure configuration management
+- **Error Boundaries** - Graceful error handling with fallback UI
+- **Toast Notifications** - User-friendly feedback instead of alerts
+- **Optimized Apollo Cache** - Cache-first strategy for better performance
+- **No Inline Styles** - All styles in CSS files for better maintainability
+- **Clean Code** - No console.logs in production, no duplicate imports
+- **Improved Error Handling** - Authentication errors automatically redirect to login
+
+### 🏗️ Project Structure
+- Clear separation of concerns (auth, components, pages, apollo)
+- Centralized type definitions
+- Modular CSS with component-specific stylesheets
+- Protected route wrapper for access control
+
+### 🔐 Security Features
+- JWT token validation and expiration checking
+- Role-based access control (RBAC)
+- Protected routes with automatic redirects
+- Environment-based error logging
+
 ## Troubleshooting
 
 ### Cannot connect to backend
@@ -188,10 +248,15 @@ The optimized production build will be in the \`build/\` directory.
 
 ## Development Notes
 
-- JWT tokens expire after 1 hour
+- JWT tokens expire after 1 hour with automatic expiration checking
 - Role-based access enforced on both frontend (routing) and backend (GraphQL)
-- Apollo Client configured with error handling and cache management
+- Apollo Client configured with:
+  - Optimized cache-first fetch policy
+  - Automatic error handling with auth error redirects
+  - Retry logic for network failures
 - TypeScript strict mode enabled for type safety
+- Error boundaries catch and display React errors gracefully
+- Toast notifications provide better UX than browser alerts
 
 ## Future Enhancements
 
