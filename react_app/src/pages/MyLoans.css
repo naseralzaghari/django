@@ -1,0 +1,162 @@
+.my-loans-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.my-loans-page h1 {
+  font-size: 32px;
+  color: #1f2937;
+  margin-bottom: 32px;
+}
+
+.loans-section {
+  margin-bottom: 48px;
+}
+
+.loans-section h2 {
+  font-size: 24px;
+  color: #1f2937;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.loans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.loan-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #3b82f6;
+}
+
+.loan-card.overdue {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.loan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.loan-header h3 {
+  font-size: 18px;
+  color: #1f2937;
+  flex: 1;
+}
+
+.status-badge {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.active {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.overdue {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.returned {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.loan-dates {
+  margin: 16px 0;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.loan-dates p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.overdue-warning {
+  color: #dc2626 !important;
+  font-weight: 600;
+  margin-top: 8px !important;
+}
+
+.days-remaining {
+  color: #059669 !important;
+  font-weight: 500;
+  margin-top: 8px !important;
+}
+
+.btn-return {
+  width: 100%;
+  margin-top: 16px;
+  background: #10b981;
+}
+
+.btn-return:hover {
+  background: #059669;
+}
+
+.history-list {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.history-item {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-item strong {
+  color: #1f2937;
+  font-size: 16px;
+}
+
+.history-item .author {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.history-dates {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.history-dates span {
+  margin: 0 8px;
+}
+
+@media (max-width: 768px) {
+  .loans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .history-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

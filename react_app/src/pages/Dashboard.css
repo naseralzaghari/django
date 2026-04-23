@@ -1,0 +1,115 @@
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+  font-size: 36px;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.user-role {
+  font-size: 18px;
+  color: #6b7280;
+}
+
+.admin-badge,
+.user-badge {
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.admin-badge {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.user-badge {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card.admin-card {
+  border-top: 4px solid #f59e0b;
+}
+
+.card-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.dashboard-card h3 {
+  font-size: 20px;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.dashboard-card p {
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.features-section {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.features-section h2 {
+  font-size: 24px;
+  color: #1f2937;
+  margin-bottom: 20px;
+}
+
+.features-section ul {
+  list-style: none;
+}
+
+.features-section li {
+  padding: 12px 0;
+  color: #374151;
+  font-size: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.features-section li:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
