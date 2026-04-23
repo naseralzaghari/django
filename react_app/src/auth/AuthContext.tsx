@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     getMe();
   };
 
-  const isAdmin = user?.userType === 'admin';
+  const isAdmin = user?.userType?.toLowerCase() === 'admin';
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, isLoading, isAdmin }}>

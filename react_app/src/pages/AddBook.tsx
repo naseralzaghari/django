@@ -13,6 +13,7 @@ const AddBook: React.FC = () => {
     totalCopies: 1,
     availableCopies: 1,
   });
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
@@ -43,7 +44,101 @@ const AddBook: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    await createBook({ variables: formData });
+    
+    // Validate ISBN length (must be exactly 13 digits)
+    if (formData.isbn.length !== 13) {
+      setError('ISBN must be exactly 13 digits');
+      return;
+    }
+    
+    // Validate PDF file size if provided (100MB limit)
+    if (pdfFile && pdfFile.size > 100 * 1024 * 1024) {
+      setError('PDF file size must be less than 100MB');
+      return;
+    }
+
+    // If there's a PDF file, use multipart form-data with fetch
+    if (pdfFile) {
+      const token = localStorage.getItem('token');
+      const formDataToSend = new FormData();
+      
+      // Add the GraphQL query and variables
+      const query = `
+        mutation CreateBook(
+          $title: String!
+          $author: String!
+          $isbn: String!
+          $description: String
+          $category: String
+          $totalCopies: Int!
+          $availableCopies: Int!
+          $pdfFile: String
+        ) {
+          createBook(
+            title: $title
+            author: $author
+            isbn: $isbn
+            description: $description
+            category: $category
+            totalCopies: $totalCopies
+            availableCopies: $availableCopies
+            pdfFile: $pdfFile
+          ) {
+            success
+            message
+            book {
+              id
+              title
+            }
+          }
+        }
+      `;
+      
+      formDataToSend.append('query', query);
+      formDataToSend.append('variables', JSON.stringify({
+        ...formData,
+        pdfFile: 'pdf_file'
+      }));
+      formDataToSend.append('pdf_file', pdfFile);
+      
+      try {
+        const response = await fetch('http://localhost:8000/graphql/', {
+          method: 'POST',
+          headers: {
+            'Authorization': `JWT ${token}`
+          },
+          body: formDataToSend
+        });
+        
+        const result = await response.json();
+        
+        if (result.data?.createBook?.success) {
+          setSuccess('Book added successfully with PDF!');
+          setFormData({
+            title: '',
+            author: '',
+            isbn: '',
+            description: '',
+            category: '',
+            totalCopies: 1,
+            availableCopies: 1,
+          });
+          setPdfFile(null);
+          // Reset file input
+          const fileInput = document.getElementById('pdfFile') as HTMLInputElement;
+          if (fileInput) fileInput.value = '';
+          
+          setTimeout(() => setSuccess(''), 3000);
+        } else {
+          setError(result.data?.createBook?.message || result.errors?.[0]?.message || 'Error creating book');
+        }
+      } catch (err: any) {
+        setError(`Error: ${err.message}`);
+      }
+    } else {
+      // No PDF file, use regular mutation
+      await createBook({ variables: formData });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -52,6 +147,24 @@ const AddBook: React.FC = () => {
       ...formData,
       [name]: name === 'totalCopies' || name === 'availableCopies' ? parseInt(value) : value,
     });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        setError('Please select a PDF file');
+        e.target.value = '';
+        return;
+      }
+      if (file.size > 100 * 1024 * 1024) {
+        setError('PDF file size must be less than 100MB');
+        e.target.value = '';
+        return;
+      }
+      setPdfFile(file);
+      setError('');
+    }
   };
 
   return (
@@ -95,7 +208,13 @@ const AddBook: React.FC = () => {
               onChange={handleChange}
               required
               placeholder="13-digit ISBN"
+              maxLength={13}
+              pattern="[0-9]{13}"
+              title="ISBN must be exactly 13 digits"
             />
+            <small style={{ color: '#6b7280', fontSize: '12px' }}>
+              {formData.isbn.length}/13 digits
+            </small>
           </div>
 
           <div className="form-group">
@@ -148,6 +267,22 @@ const AddBook: React.FC = () => {
                 required
               />
             </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="pdfFile">Book PDF (Optional, max 100MB)</label>
+            <input
+              id="pdfFile"
+              name="pdfFile"
+              type="file"
+              accept=".pdf,application/pdf"
+              onChange={handleFileChange}
+            />
+            {pdfFile && (
+              <small style={{ color: '#10b981', marginTop: '4px', display: 'block' }}>
+                Selected: {pdfFile.name} ({(pdfFile.size / 1024 / 1024).toFixed(2)} MB)
+              </small>
+            )}
           </div>
 
           {success && <div className="success-message">{success}</div>}

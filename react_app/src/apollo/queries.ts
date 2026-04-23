@@ -86,6 +86,9 @@ export const GET_AVAILABLE_BOOKS = gql`
       isbn
       category
       availableCopies
+      hasPdf
+      pdfUrl
+      pdfDownloadUrl
     }
   }
 `;

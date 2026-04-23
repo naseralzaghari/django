@@ -30,6 +30,9 @@ export interface Book {
   language?: string;
   coverImage?: string;
   isAvailable: boolean;
+  hasPdf: boolean;
+  pdfUrl?: string;
+  pdfDownloadUrl?: string;
 }
 
 export interface BookLoan {

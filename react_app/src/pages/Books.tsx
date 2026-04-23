@@ -52,6 +52,26 @@ const Books: React.FC = () => {
                 {book.category && <p><strong>Category:</strong> {book.category}</p>}
                 <p><strong>Available:</strong> {book.availableCopies} / {book.totalCopies}</p>
               </div>
+              
+              {book.hasPdf && (
+                <div className="pdf-buttons" style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                  <button
+                    onClick={() => window.open(book.pdfUrl, '_blank')}
+                    className="btn-secondary"
+                    style={{ flex: 1, padding: '8px', fontSize: '14px' }}
+                  >
+                    📄 View PDF
+                  </button>
+                  <button
+                    onClick={() => window.open(book.pdfDownloadUrl, '_blank')}
+                    className="btn-secondary"
+                    style={{ flex: 1, padding: '8px', fontSize: '14px' }}
+                  >
+                    ⬇️ Download
+                  </button>
+                </div>
+              )}
+              
               <button
                 onClick={() => handleBorrow(book.id)}
                 className="btn-primary btn-borrow"

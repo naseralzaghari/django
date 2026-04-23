@@ -25,6 +25,13 @@ class Book(models.Model):
     pages = models.PositiveIntegerField(blank=True, null=True)
     language = models.CharField(max_length=50, default='English')
     cover_image = models.URLField(blank=True, null=True, help_text='URL to book cover image')
+    pdf_file = models.FileField(
+        upload_to='library/pdfs/',
+        blank=True,
+        null=True,
+        help_text='PDF file of the book (max 100MB)',
+        max_length=500
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

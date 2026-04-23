@@ -7,6 +7,9 @@ import './Navbar.css';
 const Navbar: React.FC = () => {
   const { user, logout, isAdmin } = useAuth();
 
+  console.log('Navbar - User:', user);
+  console.log('Navbar - isAdmin:', isAdmin);
+
   return (
     <nav className="navbar">
       <div className="navbar-container">

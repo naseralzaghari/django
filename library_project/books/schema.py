@@ -1,15 +1,40 @@
 import graphene
 from graphene_django import DjangoObjectType
 from django.db.models import Q
+from graphql import GraphQLError
 from .models import Book
 from users.permissions import admin_required, login_required
+from .s3_utils import generate_presigned_url, upload_pdf_to_s3, delete_pdf_from_s3
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BookType(DjangoObjectType):
     """GraphQL type for Book model"""
+    pdf_url = graphene.String()
+    pdf_download_url = graphene.String()
+    has_pdf = graphene.Boolean()
+    
     class Meta:
         model = Book
         fields = '__all__'
+    
+    def resolve_pdf_url(self, info):
+        """Generate presigned URL for viewing PDF inline"""
+        if self.pdf_file:
+            return generate_presigned_url(self.pdf_file.name, content_disposition='inline')
+        return None
+    
+    def resolve_pdf_download_url(self, info):
+        """Generate presigned URL for downloading PDF"""
+        if self.pdf_file:
+            return generate_presigned_url(self.pdf_file.name, content_disposition='attachment')
+        return None
+    
+    def resolve_has_pdf(self, info):
+        """Check if book has PDF attached"""
+        return bool(self.pdf_file)
 
 
 class BookQuery(graphene.ObjectType):
@@ -69,6 +94,7 @@ class CreateBook(graphene.Mutation):
         pages = graphene.Int()
         language = graphene.String()
         cover_image = graphene.String()
+        pdf_file = graphene.String()  # Base64 encoded PDF or file path
     
     book = graphene.Field(BookType)
     success = graphene.Boolean()
@@ -77,14 +103,52 @@ class CreateBook(graphene.Mutation):
     @admin_required
     def mutate(root, info, title, author, isbn, **kwargs):
         try:
+            # Extract PDF file if provided
+            pdf_file = kwargs.pop('pdf_file', None)
+            
+            # Create book instance
             book = Book.objects.create(
                 title=title,
                 author=author,
                 isbn=isbn,
                 **kwargs
             )
+            
+            # Handle PDF upload if provided
+            if pdf_file:
+                try:
+                    # Handle file from request
+                    files = info.context.FILES
+                    if 'pdf_file' in files:
+                        uploaded_file = files['pdf_file']
+                        
+                        # Validate file size (100MB)
+                        if uploaded_file.size > 104857600:
+                            book.delete()
+                            return CreateBook(book=None, success=False, 
+                                           message="PDF file size exceeds 100MB limit")
+                        
+                        # Validate file type
+                        if not uploaded_file.name.lower().endswith('.pdf'):
+                            book.delete()
+                            return CreateBook(book=None, success=False, 
+                                           message="Only PDF files are allowed")
+                        
+                        # Upload to S3
+                        file_key = upload_pdf_to_s3(uploaded_file, book.id)
+                        if file_key:
+                            book.pdf_file = file_key
+                            book.save()
+                            logger.info(f"PDF uploaded for book {book.id}: {file_key}")
+                        else:
+                            logger.warning(f"Failed to upload PDF for book {book.id}")
+                except Exception as e:
+                    logger.error(f"Error handling PDF upload: {e}")
+                    # Don't fail book creation if PDF upload fails
+            
             return CreateBook(book=book, success=True, message="Book created successfully")
         except Exception as e:
+            logger.error(f"Error creating book: {e}")
             return CreateBook(book=None, success=False, message=str(e))
 
 
@@ -136,11 +200,17 @@ class DeleteBook(graphene.Mutation):
     def mutate(root, info, id):
         try:
             book = Book.objects.get(pk=id)
+            
+            # Delete PDF from S3 if exists
+            if book.pdf_file:
+                delete_pdf_from_s3(book.pdf_file.name)
+            
             book.delete()
             return DeleteBook(success=True, message="Book deleted successfully")
         except Book.DoesNotExist:
             return DeleteBook(success=False, message="Book not found")
         except Exception as e:
+            logger.error(f"Error deleting book: {e}")
             return DeleteBook(success=False, message=str(e))
 
 

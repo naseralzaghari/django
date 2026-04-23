@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'corsheaders',
     'django_filters',
+    'storages',
     # Local apps
     'users',
     'books',
@@ -239,4 +240,21 @@ LOGGING = {
         },
     },
 }
+
+# AWS S3 Configuration for PDF Storage
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'demolibrary123')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-north-1')
+AWS_S3_SIGNATURE_VERSION = os.getenv('AWS_S3_SIGNATURE_VERSION', 's3v4')
+AWS_S3_FILE_OVERWRITE = os.getenv('AWS_S3_FILE_OVERWRITE', 'False') == 'True'
+AWS_DEFAULT_ACL = None  # Private bucket
+AWS_S3_VERIFY = os.getenv('AWS_S3_VERIFY', 'True') == 'True'
+AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL', None)  # For LocalStack, leave empty for AWS
+AWS_QUERYSTRING_AUTH = True  # Generate signed URLs
+AWS_S3_MAX_MEMORY_SIZE = 104857600  # 100MB in bytes
+
+# Custom storage for PDF files
+AWS_LOCATION = 'library/pdfs'
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
