@@ -164,6 +164,65 @@ export const CREATE_BOOK = gql`
   }
 `;
 
+export const UPDATE_BOOK = gql`
+  mutation UpdateBook(
+    $id: Int!
+    $title: String
+    $author: String
+    $isbn: String
+    $description: String
+    $category: String
+    $totalCopies: Int
+    $availableCopies: Int
+  ) {
+    updateBook(
+      id: $id
+      title: $title
+      author: $author
+      isbn: $isbn
+      description: $description
+      category: $category
+      totalCopies: $totalCopies
+      availableCopies: $availableCopies
+    ) {
+      success
+      message
+      book {
+        id
+        title
+        author
+      }
+    }
+  }
+`;
+
+export const GET_BOOK = gql`
+  query GetBook($id: Int!) {
+    book(id: $id) {
+      id
+      title
+      author
+      isbn
+      description
+      category
+      totalCopies
+      availableCopies
+      hasPdf
+      pdfUrl
+      pdfDownloadUrl
+    }
+  }
+`;
+
+export const DELETE_BOOK = gql`
+  mutation DeleteBook($id: Int!) {
+    deleteBook(id: $id) {
+      success
+      message
+    }
+  }
+`;
+
 export const GET_ALL_LOANS = gql`
   query GetAllLoans {
     allLoans {
@@ -178,6 +237,7 @@ export const GET_ALL_LOANS = gql`
       }
       borrowedDate
       dueDate
+      returnDate
       status
     }
   }

@@ -168,6 +168,7 @@ class UpdateBook(graphene.Mutation):
         pages = graphene.Int()
         language = graphene.String()
         cover_image = graphene.String()
+        pdf_file = graphene.String()  # For PDF updates
     
     book = graphene.Field(BookType)
     success = graphene.Boolean()
@@ -177,14 +178,54 @@ class UpdateBook(graphene.Mutation):
     def mutate(root, info, id, **kwargs):
         try:
             book = Book.objects.get(pk=id)
+            
+            # Extract PDF file if provided
+            pdf_file = kwargs.pop('pdf_file', None)
+            
+            # Update regular fields
             for field, value in kwargs.items():
                 if value is not None:
                     setattr(book, field, value)
+            
+            # Handle PDF upload if provided
+            if pdf_file:
+                try:
+                    files = info.context.FILES
+                    if 'pdf_file' in files:
+                        uploaded_file = files['pdf_file']
+                        
+                        # Validate file size (100MB)
+                        if uploaded_file.size > 104857600:
+                            return UpdateBook(book=None, success=False, 
+                                           message="PDF file size exceeds 100MB limit")
+                        
+                        # Validate file type
+                        if not uploaded_file.name.lower().endswith('.pdf'):
+                            return UpdateBook(book=None, success=False, 
+                                           message="Only PDF files are allowed")
+                        
+                        # Delete old PDF if exists
+                        if book.pdf_file:
+                            from .s3_utils import delete_pdf_from_s3
+                            delete_pdf_from_s3(book.pdf_file)
+                        
+                        # Upload new PDF to S3
+                        file_key = upload_pdf_to_s3(uploaded_file, book.id)
+                        if file_key:
+                            book.pdf_file = file_key
+                            logger.info(f"PDF updated for book {book.id}: {file_key}")
+                        else:
+                            logger.warning(f"Failed to upload PDF for book {book.id}")
+                except Exception as e:
+                    logger.error(f"Error handling PDF update: {e}")
+                    # Don't fail book update if PDF upload fails
+            
             book.save()
             return UpdateBook(book=book, success=True, message="Book updated successfully")
         except Book.DoesNotExist:
             return UpdateBook(book=None, success=False, message="Book not found")
         except Exception as e:
+            logger.error(f"Error updating book: {e}")
             return UpdateBook(book=None, success=False, message=str(e))
 
 

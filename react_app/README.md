@@ -14,7 +14,10 @@ A React TypeScript application with Apollo Client for managing a library system 
 ### Admin Features
 - All regular user features, plus:
 - **Add Books**: Create new book entries in the system
+- **Edit Books**: Update book details and upload/replace PDFs
+- **Delete Books**: Remove books from the system
 - **View All Loans**: Monitor all loans across all users
+- **PDF Management**: Upload, view, and download book PDFs (stored in AWS S3/LocalStack)
 
 ## Tech Stack
 
@@ -52,16 +55,22 @@ REACT_APP_GRAPHQL_URL=http://localhost:8000/graphql/
 1. Make sure the Django backend is running:
 \`\`\`bash
 cd ../library_project
-python manage.py runserver
+docker-compose up -d
 \`\`\`
 
-2. In a new terminal, start the React development server:
+2. **Populate seed data** (First time only):
+\`\`\`bash
+docker exec library_web python manage.py populate_data
+\`\`\`
+This creates demo users (admin, john_doe, jane_smith, bob_wilson) and sample books.
+
+3. In a new terminal, start the React development server:
 \`\`\`bash
 cd react_app
 npm start
 \`\`\`
 
-3. Open your browser and navigate to:
+4. Open your browser and navigate to:
 \`\`\`
 http://localhost:3000
 \`\`\`
@@ -96,12 +105,14 @@ src/
 
 ## Demo Credentials
 
+**Note:** Run `docker exec library_web python manage.py populate_data` to create demo users and sample books.
+
 ### Admin User
 - **Username**: admin
 - **Password**: admin123
 
 ### Regular Users
-- **Username**: user1, user2, or user3
+- **Username**: john_doe, jane_smith, or bob_wilson
 - **Password**: user123 (for all regular users)
 
 ## Available Routes
@@ -116,8 +127,9 @@ src/
 - \`/my-loans\` - View personal loans
 
 ### Admin-Only Routes
-- \`/add-book\` - Add new books
-- \`/all-loans\` - View all system loans
+- `/admin/add-book` - Add new books
+- `/admin/edit-book/:id` - Edit existing books and manage PDFs
+- `/admin/all-loans` - View all system loans
 
 ## GraphQL Operations
 
@@ -164,10 +176,11 @@ The optimized production build will be in the \`build/\` directory.
 - Ensure JWT authentication is configured in Django
 
 ### Books not showing
-- Run Django management command to populate data:
+- Run Django management command to populate seed data:
   \`\`\`bash
-  python manage.py populate_data
+  docker exec library_web python manage.py populate_data
   \`\`\`
+- This creates 8 sample books and 4 demo users
 
 ### Authentication persists after logout
 - Clear browser localStorage
@@ -187,7 +200,9 @@ The optimized production build will be in the \`build/\` directory.
 - [ ] User profile management
 - [ ] Book categories and tags
 - [ ] Overdue loan notifications
-- [ ] Admin: Edit and delete books
+- [x] ~~Admin: Edit and delete books~~ ✅ **DONE**
+- [x] ~~PDF upload for books~~ ✅ **DONE**
+- [x] ~~View/Download book PDFs~~ ✅ **DONE**
 - [ ] Admin: User management
 - [ ] Dark mode theme
 - [ ] Mobile-responsive improvements

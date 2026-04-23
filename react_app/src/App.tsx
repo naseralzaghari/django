@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Books from './pages/Books';
 import MyLoans from './pages/MyLoans';
 import AddBook from './pages/AddBook';
+import EditBook from './pages/EditBook';
 import AllLoans from './pages/AllLoans';
 import './App.css';
 
@@ -64,6 +65,14 @@ const AppContent: React.FC = () => {
             element={
               <ProtectedRoute requiredRole="admin">
                 <AddBook />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/edit-book/:id"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <EditBook />
               </ProtectedRoute>
             }
           />

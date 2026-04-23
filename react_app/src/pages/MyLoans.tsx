@@ -27,8 +27,8 @@ const MyLoans: React.FC = () => {
   if (error) return <div className="error">Error loading loans: {error.message}</div>;
 
   const loans: BookLoan[] = data?.myLoans || [];
-  const activeLoans = loans.filter(loan => loan.status !== 'returned');
-  const completedLoans = loans.filter(loan => loan.status === 'returned');
+  const activeLoans = loans.filter(loan => loan.status.toLowerCase() !== 'returned');
+  const completedLoans = loans.filter(loan => loan.status.toLowerCase() === 'returned');
 
   return (
     <div className="my-loans-page">

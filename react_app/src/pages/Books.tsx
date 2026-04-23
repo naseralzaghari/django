@@ -1,11 +1,14 @@
 import React from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
+import { Link } from 'react-router-dom';
 import { GET_AVAILABLE_BOOKS, BORROW_BOOK } from '../apollo/queries';
+import { useAuth } from '../auth/AuthContext';
 import './Books.css';
 import { Book } from '../types';
 import './Books.css';
 
 const Books: React.FC = () => {
+  const { isAdmin } = useAuth();
   const { data, loading, error, refetch } = useQuery<{ availableBooks: Book[] }>(GET_AVAILABLE_BOOKS);
   const [borrowBook] = useMutation(BORROW_BOOK, {
     onCompleted: () => {
@@ -70,6 +73,28 @@ const Books: React.FC = () => {
                     ⬇️ Download
                   </button>
                 </div>
+              )}
+              
+              {isAdmin && (
+                <Link 
+                  to={`/admin/edit-book/${book.id}`}
+                  style={{ 
+                    display: 'block',
+                    textAlign: 'center',
+                    padding: '8px',
+                    background: '#f3f4f6',
+                    borderRadius: '6px',
+                    color: '#374151',
+                    textDecoration: 'none',
+                    marginBottom: '8px',
+                    fontWeight: '500',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#e5e7eb'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                >
+                  ✏️ Edit Book
+                </Link>
               )}
               
               <button
