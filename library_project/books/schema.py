@@ -4,7 +4,7 @@ from django.db.models import Q
 from graphql import GraphQLError
 from .models import Book
 from users.permissions import admin_required, login_required
-from .s3_utils import generate_presigned_url, upload_pdf_to_s3, delete_pdf_from_s3
+from core.storage import generate_presigned_url, upload_file_to_s3, delete_file_from_s3
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,13 +23,21 @@ class BookType(DjangoObjectType):
     def resolve_pdf_url(self, info):
         """Generate presigned URL for viewing PDF inline"""
         if self.pdf_file:
-            return generate_presigned_url(self.pdf_file.name, content_disposition='inline')
+            return generate_presigned_url(
+                self.pdf_file.name,
+                content_disposition='inline',
+                content_type='application/pdf',
+            )
         return None
-    
+
     def resolve_pdf_download_url(self, info):
         """Generate presigned URL for downloading PDF"""
         if self.pdf_file:
-            return generate_presigned_url(self.pdf_file.name, content_disposition='attachment')
+            return generate_presigned_url(
+                self.pdf_file.name,
+                content_disposition='attachment',
+                content_type='application/pdf',
+            )
         return None
     
     def resolve_has_pdf(self, info):
@@ -135,7 +143,7 @@ class CreateBook(graphene.Mutation):
                                            message="Only PDF files are allowed")
                         
                         # Upload to S3
-                        file_key = upload_pdf_to_s3(uploaded_file, book.id)
+                        file_key = upload_file_to_s3(uploaded_file, folder='books', object_id=book.id, content_type='application/pdf')
                         if file_key:
                             book.pdf_file = file_key
                             book.save()
@@ -206,11 +214,10 @@ class UpdateBook(graphene.Mutation):
                         
                         # Delete old PDF if exists
                         if book.pdf_file:
-                            from .s3_utils import delete_pdf_from_s3
-                            delete_pdf_from_s3(book.pdf_file)
-                        
+                            delete_file_from_s3(book.pdf_file)
+
                         # Upload new PDF to S3
-                        file_key = upload_pdf_to_s3(uploaded_file, book.id)
+                        file_key = upload_file_to_s3(uploaded_file, folder='books', object_id=book.id, content_type='application/pdf')
                         if file_key:
                             book.pdf_file = file_key
                             logger.info(f"PDF updated for book {book.id}: {file_key}")
@@ -244,7 +251,7 @@ class DeleteBook(graphene.Mutation):
             
             # Delete PDF from S3 if exists
             if book.pdf_file:
-                delete_pdf_from_s3(book.pdf_file.name)
+                delete_file_from_s3(book.pdf_file)
             
             book.delete()
             return DeleteBook(success=True, message="Book deleted successfully")
