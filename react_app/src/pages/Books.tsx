@@ -9,11 +9,11 @@ import './Books.css';
 
 const Books: React.FC = () => {
   const { isAdmin } = useAuth();
-  const { data, loading, error, refetch } = useQuery<{ availableBooks: Book[] }>(GET_AVAILABLE_BOOKS);
+  const { data, loading, error } = useQuery<{ availableBooks: Book[] }>(GET_AVAILABLE_BOOKS);
   const [borrowBook] = useMutation(BORROW_BOOK, {
+    refetchQueries: [{ query: GET_AVAILABLE_BOOKS }],
     onCompleted: () => {
       toast.success('Book borrowed successfully!');
-      refetch();
     },
     onError: (err: any) => {
       toast.error(`Error: ${err.message}`);

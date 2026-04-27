@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { CREATE_BOOK, GET_AVAILABLE_BOOKS } from '../apollo/queries';
+import { graphqlFileUpload } from '../config/api';
 import './AdminPages.css';
 
 const AddBook: React.FC = () => {
@@ -17,7 +18,7 @@ const AddBook: React.FC = () => {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
-  const [createBook, { loading }] = useMutation(CREATE_BOOK, {
+  const [createBook, { loading },] = useMutation(CREATE_BOOK, {
     refetchQueries: [{ query: GET_AVAILABLE_BOOKS }],
     onCompleted: (data: any) => {
       if (data.createBook.success) {
@@ -59,10 +60,6 @@ const AddBook: React.FC = () => {
 
     // If there's a PDF file, use multipart form-data with fetch
     if (pdfFile) {
-      const token = localStorage.getItem('token');
-      const formDataToSend = new FormData();
-      
-      // Add the GraphQL query and variables
       const query = `
         mutation CreateBook(
           $title: String!
@@ -94,23 +91,12 @@ const AddBook: React.FC = () => {
         }
       `;
       
-      formDataToSend.append('query', query);
-      formDataToSend.append('variables', JSON.stringify({
-        ...formData,
-        pdfFile: 'pdf_file'
-      }));
-      formDataToSend.append('pdf_file', pdfFile);
-      
       try {
-        const response = await fetch('http://localhost:8000/graphql/', {
-          method: 'POST',
-          headers: {
-            'Authorization': `JWT ${token}`
-          },
-          body: formDataToSend
-        });
-        
-        const result = await response.json();
+        const result = await graphqlFileUpload(
+          query,
+          { ...formData, pdfFile: 'pdf_file' },
+          { pdf_file: pdfFile }
+        );
         
         if (result.data?.createBook?.success) {
           setSuccess('Book added successfully with PDF!');

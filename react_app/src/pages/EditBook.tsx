@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { GET_BOOK, UPDATE_BOOK, DELETE_BOOK, GET_AVAILABLE_BOOKS } from '../apollo/queries';
 import { Book } from '../types';
+import { graphqlFileUpload } from '../config/api';
 import './AdminPages.css';
 
 const EditBook: React.FC = () => {
@@ -110,11 +111,8 @@ const EditBook: React.FC = () => {
       return;
     }
 
-    // If there's a PDF file, use multipart form-data with fetch
+    // If there's a PDF file, use multipart form-data
     if (pdfFile) {
-      const token = localStorage.getItem('token');
-      const formDataToSend = new FormData();
-      
       const query = `
         mutation UpdateBook(
           $id: Int!
@@ -148,24 +146,12 @@ const EditBook: React.FC = () => {
         }
       `;
       
-      formDataToSend.append('query', query);
-      formDataToSend.append('variables', JSON.stringify({
-        id: parseInt(id || '0'),
-        ...formData,
-        pdfFile: 'pdf_file'
-      }));
-      formDataToSend.append('pdf_file', pdfFile);
-      
       try {
-        const response = await fetch('http://localhost:8000/graphql/', {
-          method: 'POST',
-          headers: {
-            'Authorization': `JWT ${token}`
-          },
-          body: formDataToSend
-        });
-        
-        const result = await response.json();
+        const result = await graphqlFileUpload(
+          query,
+          { id: parseInt(id || '0'), ...formData, pdfFile: 'pdf_file' },
+          { pdf_file: pdfFile }
+        );
         
         if (result.data?.updateBook?.success) {
           setSuccess('Book updated successfully with PDF!');

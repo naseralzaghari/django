@@ -3,9 +3,10 @@ import { HttpLink } from '@apollo/client/link/http';
 import { SetContextLink } from '@apollo/client/link/context';
 import { ErrorLink } from '@apollo/client/link/error';
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
+import { API_URL } from '../config/api';
 
 const httpLink = new HttpLink({
-  uri: process.env.REACT_APP_API_URL || 'http://localhost:8000/graphql/',
+  uri: API_URL,
 });
 
 const authLink = new SetContextLink((prevContext, operation) => {

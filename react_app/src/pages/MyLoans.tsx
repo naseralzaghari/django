@@ -7,11 +7,11 @@ import LoanCard from '../components/LoanCard';
 import './MyLoans.css';
 
 const MyLoans: React.FC = () => {
-  const { data, loading, error, refetch } = useQuery<{ myLoans: BookLoan[] }>(GET_MY_LOANS);
+  const { data, loading, error } = useQuery<{ myLoans: BookLoan[] }>(GET_MY_LOANS);
   const [returnBook] = useMutation(RETURN_BOOK, {
+    refetchQueries: [{ query: GET_MY_LOANS }],
     onCompleted: () => {
       toast.success('Book returned successfully!');
-      refetch();
     },
     onError: (err: any) => {
       toast.error(`Error: ${err.message}`);
