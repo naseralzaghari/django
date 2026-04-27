@@ -20,6 +20,19 @@ services:
     networks:
       - library_network
 
+  redis:
+    image: redis:7-alpine
+    container_name: library_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - library_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
   web:
     build: .
     container_name: library_web
@@ -37,10 +50,73 @@ services:
       - DATABASE_PASSWORD=library_pass123
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - EMAIL_HOST=${EMAIL_HOST:-smtp.gmail.com}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
       - SECRET_KEY=+2s%$$(3)0h$$)=97j2zu+x0miwon^5iz2c4e*3#dqd4-vng+2t-
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - library_network
+
+  celery:
+    build: .
+    container_name: library_celery
+    command: celery -A library_project worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - DATABASE_NAME=library_db
+      - DATABASE_USER=library_user
+      - DATABASE_PASSWORD=library_pass123
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - EMAIL_HOST=${EMAIL_HOST:-smtp.gmail.com}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - SECRET_KEY=+2s%$$(3)0h$$)=97j2zu+x0miwon^5iz2c4e*3#dqd4-vng+2t-
+    depends_on:
+      - db
+      - redis
+    networks:
+      - library_network
+
+  celery-beat:
+    build: .
+    container_name: library_celery_beat
+    command: celery -A library_project beat --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DEBUG=True
+      - DATABASE_NAME=library_db
+      - DATABASE_USER=library_user
+      - DATABASE_PASSWORD=library_pass123
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - EMAIL_HOST=${EMAIL_HOST:-smtp.gmail.com}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-True}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - SECRET_KEY=+2s%$$(3)0h$$)=97j2zu+x0miwon^5iz2c4e*3#dqd4-vng+2t-
+    depends_on:
+      - db
+      - redis
     networks:
       - library_network
 

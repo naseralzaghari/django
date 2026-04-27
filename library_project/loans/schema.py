@@ -8,6 +8,7 @@ from books.models import Book
 from users.permissions import login_required, admin_required
 from users.schema import UserType
 from books.schema import BookType
+from .tasks import send_borrow_confirmation, send_return_confirmation
 
 
 class BookLoanType(DjangoObjectType):
@@ -128,6 +129,9 @@ class BorrowBook(graphene.Mutation):
                 book.available_copies -= 1
                 book.save()
             
+            # Send email notification asynchronously
+            send_borrow_confirmation.delay(loan.id)
+            
             return BorrowBook(
                 loan=loan,
                 success=True,
@@ -192,6 +196,9 @@ class ReturnBook(graphene.Mutation):
                 book = Book.objects.select_for_update().get(pk=loan.book.id)
                 book.available_copies += 1
                 book.save()
+            
+            # Send return confirmation email asynchronously
+            send_return_confirmation.delay(loan.id)
             
             return ReturnBook(
                 loan=loan,

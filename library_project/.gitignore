@@ -36,3 +36,7 @@ local_settings.py
 staticfiles/
 media/
 
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
