@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@apollo/client/react';
 import { GET_ALL_LOANS } from '../apollo/queries';
 import { BookLoan } from '../types';
+import LoansTable from '../components/LoansTable';
 import './AdminPages.css';
 
 const AllLoans: React.FC = () => {
@@ -27,40 +28,7 @@ const AllLoans: React.FC = () => {
         {activeLoans.length === 0 ? (
           <p className="empty-state">No active loans.</p>
         ) : (
-          <div className="loans-table-container">
-            <table className="loans-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Book</th>
-                  <th>Borrowed Date</th>
-                  <th>Due Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeLoans.map((loan: any) => (
-                  <tr key={loan.id} className={loan.status === 'overdue' ? 'overdue-row' : ''}>
-                    <td>
-                      <div>{loan.user.username}</div>
-                      <small>{loan.user.email}</small>
-                    </td>
-                    <td>
-                      <div>{loan.book.title}</div>
-                      <small>by {loan.book.author}</small>
-                    </td>
-                    <td>{new Date(loan.borrowedDate).toLocaleDateString()}</td>
-                    <td>{new Date(loan.dueDate).toLocaleDateString()}</td>
-                    <td>
-                      <span className={`status-badge ${loan.status}`}>
-                        {loan.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <LoansTable loans={activeLoans} />
         )}
       </section>
 
@@ -70,40 +38,7 @@ const AllLoans: React.FC = () => {
         {returnedLoans.length === 0 ? (
           <p className="empty-state">No returned loans yet.</p>
         ) : (
-          <div className="loans-table-container">
-            <table className="loans-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Book</th>
-                  <th>Borrowed Date</th>
-                  <th>Return Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {returnedLoans.map((loan: any) => (
-                  <tr key={loan.id}>
-                    <td>
-                      <div>{loan.user.username}</div>
-                      <small>{loan.user.email}</small>
-                    </td>
-                    <td>
-                      <div>{loan.book.title}</div>
-                      <small>by {loan.book.author}</small>
-                    </td>
-                    <td>{new Date(loan.borrowedDate).toLocaleDateString()}</td>
-                    <td>{loan.returnDate ? new Date(loan.returnDate).toLocaleDateString() : 'N/A'}</td>
-                    <td>
-                      <span className={`status-badge ${loan.status}`}>
-                        {loan.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <LoansTable loans={returnedLoans} showReturnDate />
         )}
       </section>
     </div>

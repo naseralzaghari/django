@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import toast from 'react-hot-toast';
 import { GET_MY_LOANS, RETURN_BOOK } from '../apollo/queries';
 import { BookLoan } from '../types';
+import LoanCard from '../components/LoanCard';
 import './MyLoans.css';
 
 const MyLoans: React.FC = () => {
@@ -41,28 +42,11 @@ const MyLoans: React.FC = () => {
         ) : (
           <div className="loans-grid">
             {activeLoans.map((loan) => (
-              <div key={loan.id} className={`loan-card ${loan.isOverdue ? 'overdue' : ''}`}>
-                <div className="loan-header">
-                  <h3>{loan.book.title}</h3>
-                  <span className={`status-badge ${loan.status}`}>{loan.status}</span>
-                </div>
-                <p className="book-author">by {loan.book.author}</p>
-                <div className="loan-dates">
-                  <p><strong>Borrowed:</strong> {new Date(loan.borrowedDate).toLocaleDateString()}</p>
-                  <p><strong>Due:</strong> {new Date(loan.dueDate).toLocaleDateString()}</p>
-                  {loan.isOverdue ? (
-                    <p className="overdue-warning">⚠️ {Math.abs(loan.daysUntilDue)} days overdue!</p>
-                  ) : (
-                    <p className="days-remaining">{loan.daysUntilDue} days remaining</p>
-                  )}
-                </div>
-                <button
-                  onClick={() => handleReturn(loan.id)}
-                  className="btn-primary btn-return"
-                >
-                  Return Book
-                </button>
-              </div>
+              <LoanCard
+                key={loan.id}
+                loan={loan}
+                onReturn={handleReturn}
+              />
             ))}
           </div>
         )}

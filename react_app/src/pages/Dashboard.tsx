@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import DashboardCard from '../components/DashboardCard';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
@@ -18,33 +18,12 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="dashboard-grid">
-        {/* Available to all users */}
-        <Link to="/books" className="dashboard-card">
-          <div className="card-icon">📚</div>
-          <h3>Browse Books</h3>
-          <p>View all available books in the library</p>
-        </Link>
-
-        <Link to="/my-loans" className="dashboard-card">
-          <div className="card-icon">📖</div>
-          <h3>My Loans</h3>
-          <p>View your borrowed books and due dates</p>
-        </Link>
-
-        {/* Admin only */}
+        <DashboardCard to="/books" icon="📚" title="Browse Books" description="View all available books in the library" />
+        <DashboardCard to="/my-loans" icon="📖" title="My Loans" description="View your borrowed books and due dates" />
         {isAdmin && (
           <>
-            <Link to="/admin/add-book" className="dashboard-card admin-card">
-              <div className="card-icon">➕</div>
-              <h3>Add New Book</h3>
-              <p>Add books to the library collection</p>
-            </Link>
-
-            <Link to="/admin/all-loans" className="dashboard-card admin-card">
-              <div className="card-icon">📋</div>
-              <h3>All Loans</h3>
-              <p>View all active and overdue loans</p>
-            </Link>
+            <DashboardCard to="/admin/add-book" icon="➕" title="Add New Book" description="Add books to the library collection" isAdminCard />
+            <DashboardCard to="/admin/all-loans" icon="📋" title="All Loans" description="View all active and overdue loans" isAdminCard />
           </>
         )}
       </div>

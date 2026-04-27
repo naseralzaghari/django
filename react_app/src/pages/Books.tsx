@@ -1,10 +1,10 @@
 import React from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { GET_AVAILABLE_BOOKS, BORROW_BOOK } from '../apollo/queries';
 import { useAuth } from '../auth/AuthContext';
 import { Book } from '../types';
+import BookCard from '../components/BookCard';
 import './Books.css';
 
 const Books: React.FC = () => {
@@ -45,51 +45,12 @@ const Books: React.FC = () => {
       ) : (
         <div className="books-grid">
           {books.map((book) => (
-            <div key={book.id} className="book-card">
-              <div className="book-header">
-                <h3>{book.title}</h3>
-                <span className="book-author">by {book.author}</span>
-              </div>
-              <div className="book-details">
-                <p><strong>ISBN:</strong> {book.isbn}</p>
-                {book.category && <p><strong>Category:</strong> {book.category}</p>}
-                <p><strong>Available:</strong> {book.availableCopies} / {book.totalCopies}</p>
-              </div>
-              
-              {book.hasPdf && (
-                <div className="pdf-buttons">
-                  <button
-                    onClick={() => window.open(book.pdfUrl, '_blank')}
-                    className="btn-secondary"
-                  >
-                    📄 View PDF
-                  </button>
-                  <button
-                    onClick={() => window.open(book.pdfDownloadUrl, '_blank')}
-                    className="btn-secondary"
-                  >
-                    ⬇️ Download
-                  </button>
-                </div>
-              )}
-              
-              {isAdmin && (
-                <Link 
-                  to={`/admin/edit-book/${book.id}`}
-                  className="edit-book-link"
-                >
-                  ✏️ Edit Book
-                </Link>
-              )}
-              
-              <button
-                onClick={() => handleBorrow(book.id)}
-                className="btn-primary btn-borrow"
-                disabled={book.availableCopies === 0}
-              >
-                {book.availableCopies > 0 ? 'Borrow Book' : 'Not Available'}
-              </button>
-            </div>
+            <BookCard
+              key={book.id}
+              book={book}
+              isAdmin={isAdmin}
+              onBorrow={handleBorrow}
+            />
           ))}
         </div>
       )}
